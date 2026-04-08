@@ -32,7 +32,7 @@
   
   --shadow: none;
   --shadow2: 0 8px 24px rgba(0,0,0,0.4);
-  --scrim: rgba(11, 12, 16, 0.85);
+  --scrim: rgba(11, 12, 16, 0.95);
 }
 :root[data-theme="light"] {
   --bg: #ffffff;
@@ -58,7 +58,7 @@
   
   --shadow: none;
   --shadow2: 0 8px 24px rgba(0,0,0,0.08);
-  --scrim: rgba(255, 255, 255, 0.85);
+  --scrim: rgba(255, 255, 255, 0.98);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;}
@@ -68,7 +68,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 /* HEADER */
 .header{display:flex;align-items:center;justify-content:space-between;padding:24px 22px 16px;background:var(--bg);flex-shrink:0;position:relative;z-index:300;}
 .hlogo{display:flex;align-items:center;gap:10px;}
-.hlogo svg{display:none;} /* Hidden to match minimal text logo */
+.hlogo svg{display:none;}
 .logo-txt{font-weight:700;font-size:20px;letter-spacing:-.5px;}
 .h-actions{display:flex;align-items:center;gap:10px;}
 .ibtn{width:42px;height:42px;border-radius:12px;border:none;background:transparent;color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;}
@@ -102,22 +102,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 .content::-webkit-scrollbar{width:3px;}
 .content::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:10px;}
 
-/* BLURRED MODAL OVERLAY FOR ACTIVE TIMER */
+/* 100% FULLSCREEN FOCUS OVERLAY */
 .at-overlay {
-  position: absolute;
-  top: 70px;
-  left: 0; right: 0; bottom: 0;
-  background: var(--scrim);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  z-index: 250;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg); /* Solid background to remove all underlying distractions */
+  z-index: 9999;
   display: none;
   align-items: center;
   justify-content: center;
   padding: 20px;
 }
 
-/* ACTIVE TIMER CARD (Flat Design) */
+/* ACTIVE TIMER CARD */
 .atcard {
   background: transparent;
   border: none;
@@ -131,26 +128,25 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 }
 
 /* Secondary Controls */
-.at-secondary-ctrls{position:absolute;top:-40px;left:0px;right:0px;display:flex;justify-content:space-between;align-items:center;}
+.at-secondary-ctrls{position:absolute;top:-60px;left:0px;right:0px;display:flex;justify-content:space-between;align-items:center;}
 .at-sec-left{display:flex;gap:4px;}
-.sec-btn{width:36px;height:36px;border-radius:10px;background:transparent;border:none;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;}
+.sec-btn{width:40px;height:40px;border-radius:12px;background:transparent;border:none;color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;}
 .sec-btn:hover{background:var(--bg3);color:var(--text);}
 .sec-btn.del:hover{background:var(--rbg);color:var(--red);}
 
 /* Centered Task Info */
 .at-info-center{text-align:center;margin-bottom:48px;width:100%; display: flex; align-items: center; justify-content: center; gap: 10px;}
-/* Hollow Priority Circle */
 .pdot{width:16px;height:16px;border-radius:50%;background:transparent !important;border:2px solid var(--accent);}
-.at-name{font-size:18px;font-weight:500;color:var(--text2);word-break:break-word;}
+.at-name{font-size:22px;font-weight:600;color:var(--text);word-break:break-word;}
 
 /* Large Gradient Ring */
-.ring-wrap{position:relative;width:200px;height:200px;margin-bottom:60px;}
-.rsvg{width:200px;height:200px;transform:rotate(-90deg);}
+.ring-wrap{position:relative;width:240px;height:240px;margin-bottom:60px;}
+.rsvg{width:240px;height:240px;transform:rotate(-90deg);}
 .rbg{fill:none;stroke:var(--bg3);stroke-width:12;}
 .rfg{fill:none;stroke:url(#timerGradient);stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .3s;}
-.rtime{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:42px;font-weight:700;letter-spacing:-1px;font-variant-numeric:tabular-nums;color:var(--text);}
+.rtime{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:52px;font-weight:700;letter-spacing:-1px;font-variant-numeric:tabular-nums;color:var(--text);}
 
-/* New Icon+Label Primary Controls */
+/* Icon+Label Primary Controls */
 .at-primary-ctrls{display:flex;gap:36px;justify-content:center;align-items:flex-start;width:100%;margin-bottom:24px;}
 .ctrl-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;}
 .pbtn{width:64px;height:64px;border-radius:50%;background:var(--bg3);color:var(--text);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;}
@@ -160,12 +156,16 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 
 /* Compact Chips */
 .chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:20px;}
-.chip{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;transition:all .18s;}
+.chip{padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;}
 .chip:hover{border-color:var(--text3);color:var(--text);}
 
 /* MINI TIMER (When Minimized) */
 .mini-timer {
   background: var(--bg2);
+  border-top: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-left: 4px solid var(--accent); /* Fixed Priority Line */
   border-radius: 16px;
   padding: 16px 20px;
   margin-bottom: 16px;
@@ -195,8 +195,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 .ti-bg-left { left: 0; background: var(--green); justify-content: flex-start; }
 .ti-bg-right { right: 0; background: var(--red); justify-content: flex-end; }
 
-/* The Foreground Task */
-.ti{background:var(--bg2);border-radius:16px;padding:16px 16px;display:flex;align-items:center;gap:12px;transition:all .2s;user-select:none;position:relative;z-index:1;}
+/* The Foreground Task - touch-action handles native vertical scrolling */
+.ti{background:var(--bg2);border-radius:16px;padding:16px 16px;display:flex;align-items:center;gap:12px;transition:all .2s;user-select:none;position:relative;z-index:1; touch-action: pan-y;}
 .ti.dragging{opacity:.35;transform:scale(.97);}
 .ti.drag-over{background:var(--bg4);transform:scale(1.01);}
 .ti.p-critical{border-left:4px solid var(--red);}
@@ -286,6 +286,24 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 .trow{display:flex;gap:10px;align-items:center;}
 .trow .finput{text-align:center;}
 .tsep{color:var(--text2);font-weight:700;font-size:16px;flex-shrink:0;}
+
+/* Add Task Modal Preset Buttons */
+.preset-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--text2);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.preset-btn:hover { background: var(--bg3); color: var(--text); border-color: var(--text3); }
+.preset-btn:active { transform: scale(0.95); }
+
 .pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
 .popt{padding:12px 6px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:all .18s;text-align:center;}
 .popt.sc{border-color:var(--red);color:var(--red);background:var(--rbg);}
@@ -380,7 +398,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
           </button>
         </div>
         <button class="sec-btn" onclick="minimizeActive()" title="Minimize Task">
-          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
 
@@ -406,21 +424,21 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
       <div class="at-primary-ctrls">
         <div class="ctrl-wrap">
           <button class="pbtn" onclick="skipAndNextActive()" title="Complete & Start Next">
-            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
           </button>
           <span class="ctrl-lbl">Skip</span>
         </div>
         
         <div class="ctrl-wrap">
           <button class="pbtn" id="pauseBtn" onclick="pauseResume()">
-            <svg id="pauseIco" width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            <svg id="pauseIco" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
           </button>
           <span class="ctrl-lbl" id="pauseLbl">Pause</span>
         </div>
         
         <div class="ctrl-wrap">
           <button class="pbtn" onclick="completeActive()" title="Complete">
-            <svg width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
           </button>
           <span class="ctrl-lbl">Quit</span>
         </div>
@@ -515,7 +533,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
     <div class="mpill"></div>
     <div class="mtitle" id="taskMT">New Task</div>
     <div class="fg"><label class="flbl">Task Name</label><input class="finput" type="text" id="tname" placeholder="What needs to be done?" maxlength="80"></div>
-    <div class="fg"><label class="flbl">Duration</label>
+    <div class="fg">
+      <label class="flbl">Duration</label>
+      <div style="display:flex; gap:8px; margin-bottom:12px; overflow-x:auto; padding-bottom:4px;">
+        <button type="button" class="preset-btn" onclick="setPresetTask(5)">5m</button>
+        <button type="button" class="preset-btn" onclick="setPresetTask(15)">15m</button>
+        <button type="button" class="preset-btn" onclick="setPresetTask(25)">25m</button>
+        <button type="button" class="preset-btn" onclick="setPresetTask(60)">1h</button>
+      </div>
       <div class="trow">
         <input class="finput" type="number" id="tmins" placeholder="00" min="0" max="999" style="flex:1;">
         <span class="tsep">m</span>
@@ -616,7 +641,7 @@ const alarmSel = document.getElementById('alarmSel');
 alarmSel.value = localStorage.getItem('ff_alarm') || 'default';
 alarmSel.addEventListener('change', (e) => {
   localStorage.setItem('ff_alarm', e.target.value);
-  playAlarm();
+  playAlarm(); // preview tone
 });
 
 
@@ -847,7 +872,7 @@ function showAT(t){
   document.getElementById('atdot').style.borderColor=PC[t.priority];
   document.getElementById('mtdot').style.borderColor=PC[t.priority];
   
-  // Apply priority border to Mini Timer
+  // Set accurate left border color for the Mini Timer
   document.getElementById('miniTimer').style.borderLeftColor = PC[t.priority];
   
   document.getElementById('pauseIco').innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
@@ -971,11 +996,17 @@ function restoreDel(id){const t=deleted.find(x=>x.id===id);if(!t)return;delete t
 function permDel(id){deleted=deleted.filter(x=>x.id!==id);save();render();toast('🗑 Permanently deleted.');}
 function addTime(s){secsLeft+=s;totalSecs+=s;const t=tasks.find(x=>x.id===activeId);if(t){t.mins=Math.floor(totalSecs/60);t.secs=totalSecs%60;}document.getElementById('ring').style.stroke='url(#timerGradient)';if(paused){paused=false;document.getElementById('pauseIco').innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';document.getElementById('mtPauseIco').innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';document.getElementById('pauseBtn').style.background='var(--bg3)';document.getElementById('pauseLbl').textContent='Pause';document.getElementById('mtPlayBtn').style.background='var(--bg3)';}tick();updRing();save();toast(`⏱ +${fmt(s)} added!`);}
 
-// ===== TASK MODAL =====
+// ===== TASK MODAL & PRESETS =====
 document.getElementById('fab').onclick=openAddTask;
 function openAddTask(){editId=null;selPrio='medium';document.getElementById('tname').value='';document.getElementById('tmins').value='';document.getElementById('tsecs').value='';document.getElementById('taskMT').textContent='New Task';updPrioUI();document.getElementById('taskM').classList.add('open');setTimeout(()=>document.getElementById('tname').focus(),350);}
 function openEditTask(id){const t=tasks.find(x=>x.id===id);if(!t)return;editId=id;selPrio=t.priority;document.getElementById('tname').value=t.name;document.getElementById('tmins').value=t.mins;document.getElementById('tsecs').value=t.secs;document.getElementById('taskMT').textContent='Edit Task';updPrioUI();document.getElementById('taskM').classList.add('open');}
 function closeTaskM(){document.getElementById('taskM').classList.remove('open');}
+
+function setPresetTask(m) {
+  document.getElementById('tmins').value = m;
+  document.getElementById('tsecs').value = 0;
+}
+
 function saveTask(){
   const name=document.getElementById('tname').value.trim();
   const mins=parseInt(document.getElementById('tmins').value)||0;
