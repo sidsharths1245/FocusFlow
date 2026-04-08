@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>FocusFlow – Task Timer</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -35,7 +35,7 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s;}
-.app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;overflow:hidden;}
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:480px;margin:0 auto;overflow:hidden;}
 
 /* HEADER */
 .header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 16px;background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0;}
@@ -81,7 +81,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
   background: var(--card);
   border: 1px solid var(--border2);
   border-radius: 32px;
-  /* Reduced vertical padding to square it off */
   padding: 24px;
   box-shadow: var(--shadow);
   margin-bottom: 24px;
@@ -137,7 +136,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 .ti{background:var(--card);border:1px solid var(--border);border-radius:18px;margin-bottom:12px;padding:16px 14px 16px 18px;display:flex;align-items:center;gap:12px;transition:all .2s;user-select:none;}
 .ti.dragging{opacity:.35;transform:scale(.97);}
 .ti.drag-over{border-color:var(--accent);background:var(--card2);transform:scale(1.01);}
-/* Color Coded Borders: Crit=Red, High=Yellow, Med=Green, Low=Blue */
 .ti.p-critical{border-left:4px solid var(--red);}
 .ti.p-high{border-left:4px solid var(--yellow);}
 .ti.p-medium{border-left:4px solid var(--green);}
@@ -200,12 +198,26 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 .thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .25s cubic-bezier(.34,1.56,.64,1);box-shadow:0 1px 4px rgba(0,0,0,.3);}
 .track.on .thumb{transform:translateX(24px);}
 
-/* MODALS */
-.mscrim{position:fixed;inset:0;background:var(--scrim);z-index:500;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(5px);}
+/* KEYBOARD AWARE MODALS */
+.mscrim{position:fixed;inset:0;background:var(--scrim);z-index:500;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(5px);padding-top:20px;}
 .mscrim.open{display:flex;}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:28px 28px 0 0;padding:28px 24px 44px;width:100%;max-width:480px;box-shadow:var(--shadow);animation:sup .28s cubic-bezier(.34,1.56,.64,1);}
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 28px 28px 0 0;
+  padding: 28px 24px 32px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: var(--shadow);
+  animation: sup .28s cubic-bezier(.34,1.56,.64,1);
+  /* Keyboard Awareness: Allow modal to squish and scroll if the screen height shrinks */
+  max-height: calc(100vh - 20px);
+  max-height: calc(100dvh - 20px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
 @keyframes sup{from{transform:translateY(100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.mpill{width:40px;height:5px;background:var(--border2);border-radius:5px;margin:0 auto 22px;}
+.mpill{width:40px;height:5px;background:var(--border2);border-radius:5px;margin:0 auto 22px;flex-shrink:0;}
 .mtitle{font-size:20px;font-weight:700;margin-bottom:20px;}
 .fg{margin-bottom:18px;}
 .flbl{font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;display:block;}
@@ -216,12 +228,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 .tsep{color:var(--text2);font-weight:700;font-size:16px;line-height:42px;flex-shrink:0;}
 .pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
 .popt{padding:12px 6px;border-radius:12px;border:2px solid var(--border);background:var(--bg3);color:var(--text2);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;cursor:pointer;transition:all .18s;text-align:center;}
-/* Modal Priority Selector colors update to match list borders */
 .popt.sc{border-color:var(--red);color:var(--red);background:var(--rbg);}
 .popt.sh{border-color:var(--yellow);color:var(--yellow);background:var(--ybg);}
 .popt.sm{border-color:var(--green);color:var(--green);background:var(--gbg);}
 .popt.sl{border-color:var(--blue);color:var(--blue);background:var(--bbg);}
-
 .mactions{display:flex;gap:12px;margin-top:24px;}
 .bcancel{flex:1;padding:16px;border-radius:16px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-family:'Inter',sans-serif;font-size:15px;font-weight:600;cursor:pointer;}
 .bsave{flex:2;padding:16px;border-radius:16px;border:none;background:var(--accent);color:#fff;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px var(--glow);}
@@ -335,7 +345,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
         <button class="chip" onclick="addTime(1800)">+ 30m</button>
         <button class="chip" onclick="openCustomTime()">+ Custom</button>
       </div>
-
     </div>
 
     <div class="shdr" id="qhdr" style="display:none;"><span>Up Next</span><div class="sline"></div></div>
@@ -404,7 +413,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 </div>
 
 <div class="mscrim" id="folderM">
-  <div class="modal" style="max-height:80vh;display:flex;flex-direction:column;">
+  <div class="modal">
     <div class="mpill"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
       <div class="mtitle" id="folderT" style="margin-bottom:0;"></div>
@@ -522,7 +531,7 @@ const alarmSel = document.getElementById('alarmSel');
 alarmSel.value = localStorage.getItem('ff_alarm') || 'default';
 alarmSel.addEventListener('change', (e) => {
   localStorage.setItem('ff_alarm', e.target.value);
-  playAlarm(); // preview tone
+  playAlarm();
 });
 
 
@@ -534,7 +543,6 @@ let templates=JSON.parse(localStorage.getItem('ff_tmpl')||'[]');
 let activeId=null,ticker=null,secsLeft=0,totalSecs=0,origSecs=0,paused=false;
 let sortMode=null,sortDir='asc',editId=null,selPrio='medium',curFolder=null;
 
-// Updated Priority Palette Mapping (Matches user request)
 const PC={critical:'var(--red)',high:'var(--yellow)',medium:'var(--green)',low:'var(--blue)'};
 const PO={critical:0,high:1,medium:2,low:3};
 
@@ -622,7 +630,6 @@ function renderTasks(){
   q.forEach(task=>{
     const ri=tasks.findIndex(t=>t.id===task.id);
     const d=document.createElement('div');
-    // Apply priority border class
     d.className=`ti p-${task.priority}`;d.draggable=!sortMode;d.dataset.id=task.id;d.dataset.idx=ri;
     d.innerHTML=`<div class="dh"><svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><circle cx="9" cy="5" r="1.3"/><circle cx="15" cy="5" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="19" r="1.3"/><circle cx="15" cy="19" r="1.3"/></svg></div>
     <div class="tinfo"><div class="tname">${esc(task.name)}</div>
@@ -671,7 +678,6 @@ function showAT(t){
   document.getElementById('atcard').style.display='flex';
   document.getElementById('atname').textContent=t.name;
   
-  // Set priority text and color in active timer
   const prioText = t.priority === 'critical' ? 'Crit' : t.priority;
   document.getElementById('atprio').textContent=prioText;
   document.getElementById('atprio').style.color=PC[t.priority];
@@ -699,7 +705,6 @@ function tick(){
 function updRing(){
   document.getElementById('rtime').textContent=fmt(secsLeft);
   const p=totalSecs>0?secsLeft/totalSecs:0;
-  // Circumference = 358.1 for r=57
   document.getElementById('ring').style.strokeDashoffset=358.1*(1-p);
   if(secsLeft>0)document.getElementById('ring').style.stroke='var(--accent)';
 }
@@ -724,7 +729,6 @@ function pauseResume(){
   }
 }
 
-// X Button action to minimize card safely
 function minimizeActive(){
   stopTimer();
   render();
