@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>FocusFlow – Task Timer</title>
+<title>Flow State – Task Timer</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* RASION PROJECT THEME */
@@ -20,7 +20,6 @@
   --text2: #a1a1aa;
   --text3: #71717a;
   
-  /* Signature Purple */
   --accent: #8b5cf6;
   --accent2: #d8b4fe;
   --glow: rgba(139, 92, 246, 0.15);
@@ -106,7 +105,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 .at-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: var(--bg); /* Solid background to remove all underlying distractions */
+  background: var(--bg);
   z-index: 9999;
   display: none;
   align-items: center;
@@ -259,25 +258,27 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 .thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .25s cubic-bezier(.34,1.56,.64,1);box-shadow:0 2px 4px rgba(0,0,0,.2);}
 .track.on .thumb{transform:translateX(22px);}
 
-/* KEYBOARD AWARE MODALS */
-.mscrim{position:fixed;inset:0;background:var(--scrim);z-index:500;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(8px);padding-top:20px;}
+/* KEYBOARD AWARE MODALS ALIGNED TO TOP */
+.mscrim{position:fixed;inset:0;background:var(--scrim);z-index:500;display:none;align-items:flex-start; /* Aligns to top instead of bottom */ justify-content:center;backdrop-filter:blur(8px);padding:20px;}
 .mscrim.open{display:flex;}
 .modal {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 28px 28px 0 0;
+  border-radius: 28px; /* Full rounded corners */
   padding: 24px 24px 32px;
   width: 100%;
   max-width: 480px;
   box-shadow: var(--shadow2);
-  animation: sup .28s cubic-bezier(.34,1.56,.64,1);
-  max-height: calc(100vh - 20px);
-  max-height: calc(100dvh - 20px);
+  animation: sdown .28s cubic-bezier(.34,1.56,.64,1);
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-@keyframes sup{from{transform:translateY(100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.mpill{width:40px;height:5px;background:var(--border);border-radius:5px;margin:0 auto 22px;flex-shrink:0;}
+/* Slide in from top instead of bottom */
+@keyframes sdown{from{transform:translateY(-100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+.mpill{display:none;} /* Removed drag pill since modals are now floating from top */
 .mtitle{font-size:20px;font-weight:700;margin-bottom:24px;}
 .fg{margin-bottom:20px;}
 .flbl{font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;display:block;}
@@ -331,7 +332,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 <div class="app">
   <header class="header">
     <div class="hlogo">
-      <span class="logo-txt">Rasion Project</span>
+      <span class="logo-txt">Flow State</span>
     </div>
     <div class="h-actions">
       <div class="sort-wrap">
@@ -398,7 +399,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
           </button>
         </div>
         <button class="sec-btn" onclick="minimizeActive()" title="Minimize Task">
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
 
@@ -423,24 +424,24 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 
       <div class="at-primary-ctrls">
         <div class="ctrl-wrap">
-          <button class="pbtn" onclick="skipAndNextActive()" title="Complete & Start Next">
-            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+          <button class="pbtn" onclick="skipAndNextActive()" title="Complete & Load Next">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
           </button>
           <span class="ctrl-lbl">Skip</span>
         </div>
         
         <div class="ctrl-wrap">
           <button class="pbtn" id="pauseBtn" onclick="pauseResume()">
-            <svg id="pauseIco" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            <svg id="pauseIco" width="22" height="22" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           </button>
-          <span class="ctrl-lbl" id="pauseLbl">Pause</span>
+          <span class="ctrl-lbl" id="pauseLbl">Start</span>
         </div>
         
         <div class="ctrl-wrap">
           <button class="pbtn" onclick="completeActive()" title="Complete">
-            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+            <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
           </button>
-          <span class="ctrl-lbl">Quit</span>
+          <span class="ctrl-lbl">Complete</span>
         </div>
       </div>
 
@@ -517,7 +518,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 
 <div class="mscrim" id="folderM">
   <div class="modal">
-    <div class="mpill"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
       <div class="mtitle" id="folderT" style="margin-bottom:0;"></div>
       <button onclick="closeFolder()" style="background:none;border:none;color:var(--text2);cursor:pointer;padding:6px;">
@@ -530,7 +530,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 
 <div class="mscrim" id="taskM">
   <div class="modal">
-    <div class="mpill"></div>
     <div class="mtitle" id="taskMT">New Task</div>
     <div class="fg"><label class="flbl">Task Name</label><input class="finput" type="text" id="tname" placeholder="What needs to be done?" maxlength="80"></div>
     <div class="fg">
@@ -565,7 +564,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 
 <div class="mscrim" id="custM">
   <div class="modal">
-    <div class="mpill"></div>
     <div class="mtitle">Add Extra Time</div>
     <div class="fg"><label class="flbl">Extra Duration</label>
       <div class="trow">
@@ -584,7 +582,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 
 <div class="mscrim" id="tmplM">
   <div class="modal">
-    <div class="mpill"></div>
     <div class="mtitle">Template Library</div>
     <div class="tlist" id="tmplList"></div>
     <div class="mactions"><button class="bcancel" onclick="closeTmplLib()">Close</button></div>
@@ -593,7 +590,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 
 <div class="mscrim" id="saveTM">
   <div class="modal">
-    <div class="mpill"></div>
     <div class="mtitle">Save as Template</div>
     <div class="fg"><label class="flbl">Template Name</label><input class="finput" type="text" id="tmplN" placeholder="e.g. Morning Routine" maxlength="50"></div>
     <div class="mactions">
@@ -641,7 +637,7 @@ const alarmSel = document.getElementById('alarmSel');
 alarmSel.value = localStorage.getItem('ff_alarm') || 'default';
 alarmSel.addEventListener('change', (e) => {
   localStorage.setItem('ff_alarm', e.target.value);
-  playAlarm(); // preview tone
+  playAlarm(); 
 });
 
 
@@ -650,7 +646,7 @@ let tasks=JSON.parse(localStorage.getItem('ff_t')||'[]');
 let completed=JSON.parse(localStorage.getItem('ff_c')||'[]');
 let deleted=JSON.parse(localStorage.getItem('ff_d')||'[]');
 let templates=JSON.parse(localStorage.getItem('ff_tmpl')||'[]');
-let activeId=null,ticker=null,secsLeft=0,totalSecs=0,origSecs=0,paused=false;
+let activeId=null,ticker=null,secsLeft=0,totalSecs=0,origSecs=0,paused=true;
 let sortMode=null,sortDir='asc',editId=null,selPrio='medium',curFolder=null;
 
 const PC={critical:'var(--red)',high:'var(--yellow)',medium:'var(--green)',low:'var(--blue)'};
@@ -856,12 +852,27 @@ function renderFolderC(){
 }
 
 // ===== TIMER =====
+// Updated to ALWAYS open in a paused state, awaiting manual start
 function startTask(id){
   if(activeId)stopTimer();
   const t=tasks.find(x=>x.id===id);if(!t)return;
-  activeId=id;totalSecs=t.mins*60+t.secs;secsLeft=totalSecs;origSecs=totalSecs;paused=false;
-  showAT(t);tick();render();
+  activeId=id;totalSecs=t.mins*60+t.secs;secsLeft=totalSecs;origSecs=totalSecs;
+  
+  // Enforce manual start rule
+  paused=true; 
+  
+  showAT(t);
+  
+  // Force UI into a paused/ready-to-start state immediately
+  document.getElementById('pauseIco').innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
+  document.getElementById('mtPauseIco').innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
+  document.getElementById('pauseBtn').style.background='var(--bg4)';
+  document.getElementById('pauseLbl').textContent = 'Start';
+  document.getElementById('mtPlayBtn').style.background='var(--bg4)';
+  
+  render();
 }
+
 function showAT(t){
   document.getElementById('atOverlay').style.display='flex';
   document.getElementById('miniTimer').style.display='none';
@@ -872,17 +883,11 @@ function showAT(t){
   document.getElementById('atdot').style.borderColor=PC[t.priority];
   document.getElementById('mtdot').style.borderColor=PC[t.priority];
   
-  // Set accurate left border color for the Mini Timer
   document.getElementById('miniTimer').style.borderLeftColor = PC[t.priority];
-  
-  document.getElementById('pauseIco').innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
-  document.getElementById('mtPauseIco').innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
-  document.getElementById('pauseBtn').style.background='var(--bg3)';
-  document.getElementById('pauseLbl').textContent = 'Pause';
-  document.getElementById('mtPlayBtn').style.background='var(--bg3)';
   
   updRing();
 }
+
 function tick(){
   clearInterval(ticker);
   ticker=setInterval(()=>{
@@ -898,6 +903,7 @@ function tick(){
     }
   },1000);
 }
+
 function updRing(){
   const str = fmt(secsLeft);
   document.getElementById('rtime').textContent = str;
@@ -907,12 +913,13 @@ function updRing(){
   document.getElementById('ring').style.strokeDashoffset=565.5*(1-p);
   if(secsLeft>0)document.getElementById('ring').style.stroke='url(#timerGradient)';
 }
+
 function stopTimer(){
   if(activeId) {
     const t=tasks.find(x=>x.id===activeId);
     if(t){ t.mins=Math.floor(secsLeft/60); t.secs=secsLeft%60; save(); }
   }
-  clearInterval(ticker);ticker=null;activeId=null;paused=false;
+  clearInterval(ticker);ticker=null;activeId=null;paused=true;
   document.getElementById('atOverlay').style.display='none';
   document.getElementById('miniTimer').style.display='none';
 }
@@ -937,7 +944,10 @@ function pauseResume(e){
     btn.style.background='var(--bg3)';
     lbl.textContent = 'Pause';
     mBtn.style.background='var(--bg3)';
-    if(secsLeft===0)tick();
+    
+    // Only trigger tick if it was paused to begin with
+    if(secsLeft===0) tick();
+    else { clearInterval(ticker); tick(); }
   }
 }
 
@@ -966,6 +976,7 @@ function skipAndNextActive(){
   
   const q = sorted();
   if(q.length > 0) {
+    // Calling startTask natively sets autoStart to false
     startTask(q[0].id);
   } else {
     render();
@@ -974,27 +985,43 @@ function skipAndNextActive(){
 }
 
 function completeTask(id){const t=tasks.find(x=>x.id===id);if(!t)return;t.completedAt=Date.now();completed.unshift(t);tasks=tasks.filter(x=>x.id!==id);if(activeId===id)stopTimer();save();render();toast('✅ Task completed!');}
+
 function resetActive(){
   secsLeft=origSecs;totalSecs=origSecs;
   const t=tasks.find(x=>x.id===activeId);if(t){t.mins=Math.floor(origSecs/60);t.secs=origSecs%60;}
   document.getElementById('ring').style.stroke='url(#timerGradient)';
-  if(paused){
-    paused=false;
-    document.getElementById('pauseIco').innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
-    document.getElementById('mtPauseIco').innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
-    document.getElementById('pauseBtn').style.background='var(--bg3)';
-    document.getElementById('pauseLbl').textContent = 'Pause';
-    document.getElementById('mtPlayBtn').style.background='var(--bg3)';
+  updRing();
+  save();
+  toast('🔄 Timer reset.');
+  
+  if(!paused) {
+     clearInterval(ticker);
+     tick();
+  } else {
+     document.getElementById('pauseLbl').textContent = 'Start';
   }
-  tick();updRing();save();toast('🔄 Timer reset.');
 }
+
 function deleteActive(){deleteTask(activeId);}
 function deleteTask(id){const t=tasks.find(x=>x.id===id);if(!t)return;t.deletedAt=Date.now();deleted.unshift(t);tasks=tasks.filter(x=>x.id!==id);if(activeId===id)stopTimer();save();render();toast('🗑 Task deleted.');}
 function restoreComp(id){const t=completed.find(x=>x.id===id);if(!t)return;delete t.completedAt;tasks.push(t);completed=completed.filter(x=>x.id!==id);save();render();toast('↩ Restored to queue.');}
 function compToBin(id){const t=completed.find(x=>x.id===id);if(!t)return;t.deletedAt=Date.now();deleted.unshift(t);completed=completed.filter(x=>x.id!==id);save();render();toast('🗑 Moved to bin.');}
 function restoreDel(id){const t=deleted.find(x=>x.id===id);if(!t)return;delete t.deletedAt;delete t.completedAt;tasks.push(t);deleted=deleted.filter(x=>x.id!==id);save();render();toast('↩ Restored to queue.');}
 function permDel(id){deleted=deleted.filter(x=>x.id!==id);save();render();toast('🗑 Permanently deleted.');}
-function addTime(s){secsLeft+=s;totalSecs+=s;const t=tasks.find(x=>x.id===activeId);if(t){t.mins=Math.floor(totalSecs/60);t.secs=totalSecs%60;}document.getElementById('ring').style.stroke='url(#timerGradient)';if(paused){paused=false;document.getElementById('pauseIco').innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';document.getElementById('mtPauseIco').innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';document.getElementById('pauseBtn').style.background='var(--bg3)';document.getElementById('pauseLbl').textContent='Pause';document.getElementById('mtPlayBtn').style.background='var(--bg3)';}tick();updRing();save();toast(`⏱ +${fmt(s)} added!`);}
+
+function addTime(s){
+  secsLeft+=s;totalSecs+=s;
+  const t=tasks.find(x=>x.id===activeId);if(t){t.mins=Math.floor(totalSecs/60);t.secs=totalSecs%60;}
+  document.getElementById('ring').style.stroke='url(#timerGradient)';
+  updRing();
+  save();
+  toast(`⏱ +${fmt(s)} added!`);
+  
+  if(!paused) {
+     clearInterval(ticker);
+     tick();
+  }
+}
 
 // ===== TASK MODAL & PRESETS =====
 document.getElementById('fab').onclick=openAddTask;
