@@ -579,7 +579,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 // ===== FIREBASE INIT =====
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB-IHXckHU4-M4JQQyzToTJ0mj8MAh9sE4",
@@ -596,30 +596,67 @@ const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
 let currentUser = null;
+let unsubSnapshot = null;
 
-// Handle Auth State Changes
-onAuthStateChanged(auth, async (user) => {
+// Handle Auth State Changes & Real-Time Sync
+onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
     document.getElementById('authLbl').textContent = "Sign out (" + user.displayName.split(" ")[0] + ")";
     toast(`☁ Synced as ${user.displayName}`);
     
-    // Fetch data from Cloud on login
-    try {
-      const docSnap = await getDoc(doc(db, "users", user.uid));
+    // REAL-TIME LISTENER
+    unsubSnapshot = onSnapshot(doc(db, "users", user.uid), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         tasks = data.tasks || [];
         completed = data.completed || [];
         deleted = data.deleted || [];
         templates = data.templates || [];
-        saveLocalOnly(); // Save cloud data locally without triggering a cloud re-write
+        
+        // Sync Active Timer State
+        const ast = data.activeState;
+        if (ast) {
+           // Prevent the active ticking timer from stuttering if local state is roughly the same
+           if (ast.id !== activeId || ast.paused !== paused || Math.abs(ast.secsLeft - secsLeft) > 5) {
+               activeId = ast.id;
+               secsLeft = ast.secsLeft;
+               totalSecs = ast.totalSecs;
+               origSecs = ast.origSecs;
+               paused = ast.paused;
+               
+               if (activeId) {
+                   const t = tasks.find(x => x.id === activeId);
+                   if (t) {
+                       showAT(t);
+                       syncPlayPauseUI();
+                       if (!paused) { clearInterval(ticker); tick(); }
+                       else { clearInterval(ticker); }
+                   } else {
+                       stopTimerLocalUI();
+                   }
+               } else {
+                   stopTimerLocalUI();
+               }
+           }
+        } else {
+           if(activeId) stopTimerLocalUI();
+        }
+        
+        saveLocalOnly();
         render();
       }
-    } catch (e) { console.error("Error fetching data:", e); }
+    }, (error) => {
+      console.error("Real-time sync error:", error);
+    });
+
   } else {
     currentUser = null;
     document.getElementById('authLbl').textContent = "Sign in with Google";
+    if (unsubSnapshot) {
+      unsubSnapshot();
+      unsubSnapshot = null;
+    }
   }
 });
 
@@ -679,30 +716,43 @@ alarmSel.addEventListener('change', (e) => {
   playAlarm(); 
 });
 
-
 // ===== STATE =====
 let tasks=JSON.parse(localStorage.getItem('ff_t')||'[]');
 let completed=JSON.parse(localStorage.getItem('ff_c')||'[]');
 let deleted=JSON.parse(localStorage.getItem('ff_d')||'[]');
 let templates=JSON.parse(localStorage.getItem('ff_tmpl')||'[]');
+
 let activeId=null,ticker=null,secsLeft=0,totalSecs=0,origSecs=0,paused=true;
 let sortMode=null,sortDir='asc',editId=null,selPrio='medium',curFolder=null;
 let activeFilter='all';
 
-// Modified Save function to handle Cloud Sync
+// Boot active timer state from local storage so it survives refresh
+let astLoad = JSON.parse(localStorage.getItem('ff_active') || 'null');
+if (astLoad && astLoad.id) {
+    activeId = astLoad.id;
+    secsLeft = astLoad.secsLeft;
+    totalSecs = astLoad.totalSecs;
+    origSecs = astLoad.origSecs;
+    paused = astLoad.paused;
+}
+
+// Local Saving
 function saveLocalOnly() {
   localStorage.setItem('ff_t',JSON.stringify(tasks));
   localStorage.setItem('ff_c',JSON.stringify(completed));
   localStorage.setItem('ff_d',JSON.stringify(deleted));
   localStorage.setItem('ff_tmpl',JSON.stringify(templates));
+  localStorage.setItem('ff_active', JSON.stringify({id: activeId, secsLeft, totalSecs, origSecs, paused}));
 }
 
+// Cloud Saving
 async function save(){
   saveLocalOnly();
   if (currentUser) {
     try {
       await setDoc(doc(db, "users", currentUser.uid), {
         tasks, completed, deleted, templates,
+        activeState: {id: activeId, secsLeft, totalSecs, origSecs, paused},
         lastUpdated: Date.now()
       }, { merge: true });
     } catch (e) {
@@ -847,9 +897,9 @@ function render(){
   if(activeFilter === 'high') {
      q = q.filter(t => t.priority === 'critical' || t.priority === 'high');
   } else if (activeFilter === 'quick') {
-     q = q.filter(t => (t.mins * 60 + t.secs) <= 900); // 15 mins or less
+     q = q.filter(t => (t.mins * 60 + t.secs) <= 900);
   } else if (activeFilter === 'long') {
-     q = q.filter(t => (t.mins * 60 + t.secs) > 1800); // Over 30 mins
+     q = q.filter(t => (t.mins * 60 + t.secs) > 1800);
   } else if (activeFilter === 'med') {
      q = q.filter(t => t.priority === 'medium');
   } else if (activeFilter === 'low') {
@@ -865,6 +915,16 @@ function render(){
   document.getElementById('dbTmpl').textContent=templates.length;
   renderTasks(q);
   if(curFolder)renderFolderC();
+  
+  // Boot active timer UI if needed
+  if(activeId) {
+     const t = tasks.find(x => x.id === activeId);
+     if(t) {
+         showAT(t);
+         syncPlayPauseUI();
+         if(!paused && !ticker) { tick(); }
+     }
+  }
 }
 
 function sorted(baseArray){
@@ -992,24 +1052,12 @@ window.startTask = function(id, autoStart = true){
   activeId=id;totalSecs=t.mins*60+t.secs;secsLeft=totalSecs;origSecs=totalSecs;
   
   paused = !autoStart; 
-  
   showAT(t);
+  syncPlayPauseUI();
   
-  if(autoStart) {
-    document.getElementById('pauseIco').innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
-    document.getElementById('mtPauseIco').innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
-    document.getElementById('pauseBtn').style.background='var(--bg3)';
-    document.getElementById('pauseLbl').textContent = 'Pause';
-    document.getElementById('mtPlayBtn').style.background='var(--bg3)';
-    tick();
-  } else {
-    document.getElementById('pauseIco').innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
-    document.getElementById('mtPauseIco').innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
-    document.getElementById('pauseBtn').style.background='var(--bg4)';
-    document.getElementById('pauseLbl').textContent = 'Start';
-    document.getElementById('mtPlayBtn').style.background='var(--bg4)';
-  }
+  if(autoStart) { tick(); }
   
+  save(); // Cloud Sync the Start state
   render();
 }
 
@@ -1031,6 +1079,26 @@ function showAT(t){
   updRing();
 }
 
+function syncPlayPauseUI() {
+    const ico=document.getElementById('pauseIco'),btn=document.getElementById('pauseBtn');
+    const mIco=document.getElementById('mtPauseIco'),mBtn=document.getElementById('mtPlayBtn');
+    const lbl=document.getElementById('pauseLbl');
+    
+    if(paused){
+      ico.innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
+      mIco.innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
+      btn.style.background='var(--bg4)';
+      lbl.textContent = 'Resume';
+      mBtn.style.background='var(--bg4)';
+    } else {
+      ico.innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+      mIco.innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+      btn.style.background='var(--bg3)';
+      lbl.textContent = 'Pause';
+      mBtn.style.background='var(--bg3)';
+    }
+}
+
 function tick(){
   clearInterval(ticker);
   ticker=setInterval(()=>{
@@ -1038,6 +1106,7 @@ function tick(){
     if(secsLeft>0){
       secsLeft--;
       updRing();
+      // Notice we do NOT call save() here. That would spam Firestore every second.
     } else {
       clearInterval(ticker);
       playAlarm();
@@ -1057,40 +1126,33 @@ function updRing(){
   if(secsLeft>0)document.getElementById('ring').style.stroke='url(#timerGradient)';
 }
 
-function stopTimer(){
-  if(activeId) {
-    const t=tasks.find(x=>x.id===activeId);
-    if(t){ t.mins=Math.floor(secsLeft/60); t.secs=secsLeft%60; save(); }
-  }
+function stopTimerLocalUI() {
   clearInterval(ticker);ticker=null;activeId=null;paused=true;
   document.getElementById('atOverlay').style.display='none';
   document.getElementById('miniTimer').style.display='none';
 }
 
+function stopTimer(){
+  if(activeId) {
+    const t=tasks.find(x=>x.id===activeId);
+    if(t){ t.mins=Math.floor(secsLeft/60); t.secs=secsLeft%60; }
+  }
+  stopTimerLocalUI();
+  save();
+}
+
 window.pauseResume = function(e){
   if(e) e.stopPropagation();
   paused=!paused;
+  syncPlayPauseUI();
   
-  const ico=document.getElementById('pauseIco'),btn=document.getElementById('pauseBtn');
-  const mIco=document.getElementById('mtPauseIco'),mBtn=document.getElementById('mtPlayBtn');
-  const lbl=document.getElementById('pauseLbl');
-  
-  if(paused){
-    ico.innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
-    mIco.innerHTML='<polygon points="5 3 19 12 5 21 5 3"/>';
-    btn.style.background='var(--bg4)';
-    lbl.textContent = 'Resume';
-    mBtn.style.background='var(--bg4)';
+  if(paused) {
+     clearInterval(ticker);
   } else {
-    ico.innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
-    mIco.innerHTML='<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
-    btn.style.background='var(--bg3)';
-    lbl.textContent = 'Pause';
-    mBtn.style.background='var(--bg3)';
-    
-    if(secsLeft===0) tick();
-    else { clearInterval(ticker); tick(); }
+     if(secsLeft===0) tick();
+     else { clearInterval(ticker); tick(); }
   }
+  save(); // Cloud Sync Pause State
 }
 
 window.minimizeActive = function(){
@@ -1103,7 +1165,7 @@ window.maximizeActive = function(){
   document.getElementById('miniTimer').style.display='none';
 }
 
-window.completeActive = function(){const t=tasks.find(x=>x.id===activeId);if(!t)return;t.completedAt=Date.now();completed.unshift(t);tasks=tasks.filter(x=>x.id!==activeId);stopTimer();save();render();toast('✅ Task completed!');}
+window.completeActive = function(){const t=tasks.find(x=>x.id===activeId);if(!t)return;t.completedAt=Date.now();completed.unshift(t);tasks=tasks.filter(x=>x.id!==activeId);stopTimerLocalUI();save();render();toast('✅ Task completed!');}
 
 window.skipAndNextActive = function(){
   if(!activeId) return;
@@ -1113,7 +1175,7 @@ window.skipAndNextActive = function(){
     completed.unshift(t);
     tasks=tasks.filter(x=>x.id!==activeId);
   }
-  stopTimer();
+  stopTimerLocalUI();
   save();
   
   const q = sorted(tasks);
@@ -1125,26 +1187,24 @@ window.skipAndNextActive = function(){
   }
 }
 
-window.completeTask = function(id){const t=tasks.find(x=>x.id===id);if(!t)return;t.completedAt=Date.now();completed.unshift(t);tasks=tasks.filter(x=>x.id!==id);if(activeId===id)stopTimer();save();render();toast('✅ Task completed!');}
+window.completeTask = function(id){const t=tasks.find(x=>x.id===id);if(!t)return;t.completedAt=Date.now();completed.unshift(t);tasks=tasks.filter(x=>x.id!==id);if(activeId===id)stopTimerLocalUI();save();render();toast('✅ Task completed!');}
 
 window.resetActive = function(){
   secsLeft=origSecs;totalSecs=origSecs;
   const t=tasks.find(x=>x.id===activeId);if(t){t.mins=Math.floor(origSecs/60);t.secs=origSecs%60;}
   document.getElementById('ring').style.stroke='url(#timerGradient)';
   updRing();
-  save();
+  save(); // Cloud Sync Reset State
   toast('🔄 Timer reset.');
   
   if(!paused) {
      clearInterval(ticker);
      tick();
-  } else {
-     document.getElementById('pauseLbl').textContent = 'Start';
   }
 }
 
 window.deleteActive = function(){window.deleteTask(activeId);}
-window.deleteTask = function(id){const t=tasks.find(x=>x.id===id);if(!t)return;t.deletedAt=Date.now();deleted.unshift(t);tasks=tasks.filter(x=>x.id!==id);if(activeId===id)stopTimer();save();render();toast('🗑 Task deleted.');}
+window.deleteTask = function(id){const t=tasks.find(x=>x.id===id);if(!t)return;t.deletedAt=Date.now();deleted.unshift(t);tasks=tasks.filter(x=>x.id!==id);if(activeId===id)stopTimerLocalUI();save();render();toast('🗑 Task deleted.');}
 window.restoreComp = function(id){const t=completed.find(x=>x.id===id);if(!t)return;delete t.completedAt;tasks.push(t);completed=completed.filter(x=>x.id!==id);save();render();toast('↩ Restored to queue.');}
 window.compToBin = function(id){const t=completed.find(x=>x.id===id);if(!t)return;t.deletedAt=Date.now();deleted.unshift(t);completed=completed.filter(x=>x.id!==id);save();render();toast('🗑 Moved to bin.');}
 window.restoreDel = function(id){const t=deleted.find(x=>x.id===id);if(!t)return;delete t.deletedAt;delete t.completedAt;tasks.push(t);deleted=deleted.filter(x=>x.id!==id);save();render();toast('↩ Restored to queue.');}
@@ -1155,7 +1215,7 @@ window.addTime = function(s){
   const t=tasks.find(x=>x.id===activeId);if(t){t.mins=Math.floor(totalSecs/60);t.secs=totalSecs%60;}
   document.getElementById('ring').style.stroke='url(#timerGradient)';
   updRing();
-  save();
+  save(); // Cloud Sync the Added Time
   toast(`⏱ +${fmt(s)} added!`);
   
   if(!paused) {
