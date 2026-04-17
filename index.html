@@ -292,7 +292,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 .bcancel:hover{background:var(--bg4);color:var(--text);}
 .bsave{flex:2;padding:16px;border-radius:16px;border:none;background:var(--accent);color:#fff;font-family:'Inter',sans-serif;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px var(--glow);}
 
-.tlist{max-height:280px;overflow-y:auto;}
+.tlist{max-height:280px;overflow-y:auto;overflow-x:hidden;}
 .titem{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;border:1px solid var(--border);background:var(--bg3);margin-bottom:8px;cursor:pointer;transition:all .2s;}
 .titem:hover{border-color:var(--text3);}
 .tiname{font-size:14px;font-weight:500;}
@@ -300,7 +300,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 .tidel{background:none;border:none;color:var(--text3);cursor:pointer;padding:6px;border-radius:8px;}
 .tidel:hover{color:var(--text);}
 
-.toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:12px 22px;border-radius:30px;font-size:14px;font-weight:500;z-index:10010;opacity:0;transition:all .28s;pointer-events:none;white-space:nowrap;box-shadow:var(--shadow2);}
+.toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--bg2);border:1px solid var(--border);color:var(--text);padding:12px 22px;border-radius:30px;font-size:14px;font-weight:500;z-index:10020;opacity:0;transition:all .28s;pointer-events:none;white-space:nowrap;box-shadow:var(--shadow2);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
@@ -442,7 +442,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
     </div>
   </div>
 
-  <button class="fab" id="fab">
+  <button class="fab" id="fab" onclick="openAddTask()">
     <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </button>
 </div>
@@ -497,13 +497,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
 
     <div class="ddivider"></div>
     
-    <div class="dseclbl">Appearance</div>
-    <div class="toggle-row">
-      <div class="dicon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" id="thico"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
-      <span style="font-size:15px;font-weight:500;flex:1;" id="thlbl">Dark Mode</span>
-      <div class="track on" id="thtrack"><div class="thumb"></div></div>
-    </div>
-    <div class="ddivider"></div>
     <div class="dseclbl">Navigate</div>
     <button class="ditem" onclick="openFolder('completed')">
       <div class="dicon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
@@ -524,19 +517,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
     </button>
     
     <div class="ddivider"></div>
-    <div class="dseclbl">Alarm Setting</div>
+    <div class="dseclbl">Appearance</div>
     <div class="toggle-row">
-      <div class="dicon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></div>
-      <span style="font-size:15px;font-weight:500;flex:1;">Timer End Alarm</span>
-      <div class="track on" id="sndtrack"><div class="thumb"></div></div>
+      <div class="dicon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" id="thico"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></div>
+      <span style="font-size:15px;font-weight:500;flex:1;" id="thlbl">Dark Mode</span>
+      <div class="track on" id="thtrack"><div class="thumb"></div></div>
     </div>
-    <div style="padding: 0 12px 14px;">
-      <select id="alarmSel" style="width: 100%; padding: 12px; border-radius: 12px; background: var(--bg3); color: var(--text); border: 1px solid var(--border); outline: none; font-family: 'Inter', sans-serif; font-size: 14px; cursor: pointer;">
-        <option value="default">Default Beeps</option>
-        <option value="chime">Gentle Chime</option>
-        <option value="buzzer">Loud Buzzer</option>
-      </select>
-    </div>
+    
   </div>
 </div>
 
@@ -552,6 +539,72 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
       </div>
     </div>
     <div id="folderC" style="overflow-y:auto;flex:1;"></div>
+  </div>
+</div>
+
+<div class="mscrim" id="custM">
+  <div class="modal">
+    <div class="mtitle">Add Extra Time</div>
+    <div class="fg"><label class="flbl">Extra Duration</label>
+      <div class="trow">
+        <input class="finput" type="number" id="emins" placeholder="00" min="0" style="flex:1;">
+        <span class="tsep">m</span>
+        <input class="finput" type="number" id="esecs" placeholder="00" min="0" max="59" style="flex:1;">
+        <span class="tsep">s</span>
+      </div>
+    </div>
+    <div class="mactions">
+      <button class="bcancel" onclick="closeCust()">Cancel</button>
+      <button class="bsave" onclick="addCustTime()">Add Time</button>
+    </div>
+  </div>
+</div>
+
+<div class="mscrim" id="tmplM">
+  <div class="modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+      <div class="mtitle" style="margin-bottom:0;">Template Library</div>
+      <div style="display:flex; gap:8px;">
+        <button onclick="openNewTmpl()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;" title="Create New Template">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button onclick="openSaveTmpl()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;" title="Save Queue as Template">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="tlist" id="tmplList"></div>
+    <div class="mactions"><button class="bcancel" onclick="closeTmplLib()">Close</button></div>
+  </div>
+</div>
+
+<div class="mscrim" id="saveTM">
+  <div class="modal">
+    <div class="mtitle">Save as Template</div>
+    <div class="fg"><label class="flbl">Template Name</label><input class="finput" type="text" id="tmplN" placeholder="e.g. Morning Routine" maxlength="50"></div>
+    <div class="mactions">
+      <button class="bcancel" onclick="closeSaveTmpl()">Cancel</button>
+      <button class="bsave" onclick="doSaveTmpl()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="mscrim" id="tmplEditM">
+  <div class="modal">
+    <div class="mtitle">Edit Template</div>
+    <div class="fg">
+      <label class="flbl">Template Name</label>
+      <input class="finput" type="text" id="tmplEditN" maxlength="50" placeholder="Template Name">
+    </div>
+    <div class="fg">
+      <label class="flbl">Tasks in Template</label>
+      <div class="tlist" id="tmplEditList" style="max-height: 220px; margin-bottom: 12px; overflow-y: auto;"></div>
+      <button class="preset-btn" style="width: 100%; padding: 14px;" onclick="openTmplTaskAdd()">+ Add Task to Template</button>
+    </div>
+    <div class="mactions">
+      <button class="bcancel" onclick="closeTmplEdit()">Cancel</button>
+      <button class="bsave" onclick="saveTmplEdit()">Save Template</button>
+    </div>
   </div>
 </div>
 
@@ -586,48 +639,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);trans
     <div class="mactions">
       <button class="bcancel" onclick="closeTaskM()">Cancel</button>
       <button class="bsave" onclick="saveTask()">Save Task</button>
-    </div>
-  </div>
-</div>
-
-<div class="mscrim" id="custM">
-  <div class="modal">
-    <div class="mtitle">Add Extra Time</div>
-    <div class="fg"><label class="flbl">Extra Duration</label>
-      <div class="trow">
-        <input class="finput" type="number" id="emins" placeholder="00" min="0" style="flex:1;">
-        <span class="tsep">m</span>
-        <input class="finput" type="number" id="esecs" placeholder="00" min="0" max="59" style="flex:1;">
-        <span class="tsep">s</span>
-      </div>
-    </div>
-    <div class="mactions">
-      <button class="bcancel" onclick="closeCust()">Cancel</button>
-      <button class="bsave" onclick="addCustTime()">Add Time</button>
-    </div>
-  </div>
-</div>
-
-<div class="mscrim" id="tmplM">
-  <div class="modal">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-      <div class="mtitle" style="margin-bottom:0;">Template Library</div>
-      <button onclick="openSaveTmpl()" style="background:var(--bg3);border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;" title="Save Queue as Template">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </button>
-    </div>
-    <div class="tlist" id="tmplList"></div>
-    <div class="mactions"><button class="bcancel" onclick="closeTmplLib()">Close</button></div>
-  </div>
-</div>
-
-<div class="mscrim" id="saveTM">
-  <div class="modal">
-    <div class="mtitle">Save as Template</div>
-    <div class="fg"><label class="flbl">Template Name</label><input class="finput" type="text" id="tmplN" placeholder="e.g. Morning Routine" maxlength="50"></div>
-    <div class="mactions">
-      <button class="bcancel" onclick="closeSaveTmpl()">Cancel</button>
-      <button class="bsave" onclick="doSaveTmpl()">Save</button>
     </div>
   </div>
 </div>
@@ -714,8 +725,8 @@ window.resetPassword = async function() {
 window.logOutUser = async function() { await signOut(auth); toast("Working offline."); closeDrawer(); };
 
 // ===== AUDIO =====
-let sndCtx=null,sndOn=true;
-function ac(){if(!sndCtx)sndCtx=new(window.AudioContext||window.webkitAudioContext)();if(sndCtx.state==='suspended')sndCtx.resume();return sndCtx;}
+let sndOn = localStorage.getItem('ff_snd') !== '0';
+function ac(){if(!window.sndCtx)window.sndCtx=new(window.AudioContext||window.webkitAudioContext)();if(window.sndCtx.state==='suspended')window.sndCtx.resume();return window.sndCtx;}
 
 function p(f,d,t='sine',v=1,dl=0){
   const c=ac(),m=c.createGain();m.gain.value=0.2;m.connect(c.destination);
@@ -729,7 +740,7 @@ function p(f,d,t='sine',v=1,dl=0){
 
 function playAlarm(){
   if(!sndOn)return;
-  const alarmType = document.getElementById('alarmSel').value;
+  const alarmType = localStorage.getItem('ff_alarm') || 'default';
   if(alarmType === 'default') { for(let i=0;i<3;i++){p(880,.12,'square',.5,i*.22);p(440,.1,'square',.3,i*.22+.12);} }
   else if (alarmType === 'chime') { p(1047, .2); p(1318, .6, 'sine', 1, .25); }
   else if (alarmType === 'buzzer') { for(let i=0;i<4;i++){p(300,.2,'sawtooth',.6,i*.3);} }
@@ -737,24 +748,15 @@ function playAlarm(){
 
 function playHalfwaySound(){
   if(!sndOn) return;
-  // First Triple Beep
   p(880, 0.08, 'square', 0.5, 0);    
   p(980, 0.08, 'square', 0.5, 0.12); 
   p(1100, 0.1, 'square', 0.5, 0.24); 
-  // Second Triple Beep (1.0s gap)
   p(880, 0.08, 'square', 0.5, 1.0);    
   p(980, 0.08, 'square', 0.5, 1.12); 
   p(1100, 0.1, 'square', 0.5, 1.24);
 }
 
 function playTickSound(){ if(!sndOn) return; p(880, 0.1, 'square', 0.3, 0); }
-
-const sndTrack=document.getElementById('sndtrack');
-sndTrack.onclick=()=>{sndOn=!sndOn;sndTrack.classList.toggle('on',sndOn);localStorage.setItem('ff_snd',sndOn?'1':'0');};
-if(localStorage.getItem('ff_snd')==='0'){sndOn=false;sndTrack.classList.remove('on');}
-const alarmSel = document.getElementById('alarmSel');
-alarmSel.value = localStorage.getItem('ff_alarm') || 'default';
-alarmSel.addEventListener('change', (e) => { localStorage.setItem('ff_alarm', e.target.value); playAlarm(); });
 
 // ===== STATE & CONFIRM MODAL =====
 let tasks=JSON.parse(localStorage.getItem('ff_t')||'[]');
@@ -1052,9 +1054,7 @@ function tick(){
     if(paused)return;
     if(secsLeft>0){
       secsLeft--; updRing();
-      // Halfway sound logic
       if (totalSecs > 10 && secsLeft === Math.floor(totalSecs / 2)) { playHalfwaySound(); toast("Halfway there!"); }
-      // Final 5 seconds tick
       if (secsLeft <= 5 && secsLeft > 0) { playTickSound(); }
     } else {
       clearInterval(ticker); playAlarm(); document.getElementById('ring').style.stroke='var(--red)'; toast("Time's up!");
@@ -1096,19 +1096,59 @@ window.restoreTmpl = function(id) {
 window.permDel = function(id){ deleted=deleted.filter(x=>x.id!==id); save(); renderFolderC(); render(); }
 window.addTime = function(s){ secsLeft+=s; totalSecs+=s; updRing(); save(); if(!paused) { clearInterval(ticker); tick(); } }
 
-// ===== TASK MODAL =====
-document.getElementById('fab').onclick=openAddTask;
-function openAddTask(){ editId=null; selPrio='medium'; document.getElementById('tname').value=''; document.getElementById('tdesc').value=''; document.getElementById('tmins').value=''; document.getElementById('tsecs').value=''; document.getElementById('taskMT').textContent='New Task'; updPrioUI(); document.getElementById('taskM').classList.add('open'); setTimeout(()=>document.getElementById('tname').focus(),350); }
-window.openEditTask = function(id){ const t=tasks.find(x=>x.id===id); if(!t)return; editId=id; selPrio=t.priority; document.getElementById('tname').value=t.name; document.getElementById('tdesc').value=t.desc||''; document.getElementById('tmins').value=t.mins; document.getElementById('tsecs').value=t.secs; document.getElementById('taskMT').textContent='Edit Task'; updPrioUI(); document.getElementById('taskM').classList.add('open'); }
-window.closeTaskM = function(){document.getElementById('taskM').classList.remove('open');}
+// ===== TASK MODAL CONTEXTS =====
+let taskContext = 'queue'; // 'queue' or 'template'
+
+window.openAddTask = function() { 
+  taskContext = 'queue';
+  editId = null; 
+  selPrio = 'medium'; 
+  document.getElementById('tname').value = ''; 
+  document.getElementById('tdesc').value = ''; 
+  document.getElementById('tmins').value = ''; 
+  document.getElementById('tsecs').value = ''; 
+  document.getElementById('taskMT').textContent = 'New Task'; 
+  updPrioUI(); 
+  document.getElementById('taskM').style.zIndex = '10000';
+  document.getElementById('taskM').classList.add('open'); 
+  setTimeout(()=>document.getElementById('tname').focus(),350); 
+}
+
+window.openEditTask = function(id){ 
+  taskContext = 'queue';
+  const t = tasks.find(x=>x.id===id); if(!t)return; 
+  editId = id; selPrio = t.priority; 
+  document.getElementById('tname').value = t.name; 
+  document.getElementById('tdesc').value = t.desc||''; 
+  document.getElementById('tmins').value = t.mins; 
+  document.getElementById('tsecs').value = t.secs; 
+  document.getElementById('taskMT').textContent = 'Edit Task'; 
+  updPrioUI(); 
+  document.getElementById('taskM').style.zIndex = '10000';
+  document.getElementById('taskM').classList.add('open'); 
+}
+
+window.closeTaskM = function(){ document.getElementById('taskM').classList.remove('open'); }
 window.setPresetTask = function(m) { document.getElementById('tmins').value = m; document.getElementById('tsecs').value = 0; }
+
 window.saveTask = function(){
   const name=document.getElementById('tname').value.trim(), desc=document.getElementById('tdesc').value.trim(), mins=parseInt(document.getElementById('tmins').value)||0, secs=Math.min(parseInt(document.getElementById('tsecs').value)||0,59);
   if(!name||(!mins&&!secs)){toast('Invalid input.');return;}
+
+  if (taskContext === 'template') {
+     const tData = {name,desc,mins,secs,priority:selPrio};
+     if (editId !== null) activeTmplTasks[editId] = tData;
+     else activeTmplTasks.push(tData);
+     renderTmplEditList();
+     window.closeTaskM();
+     return;
+  }
+
   if(editId){ const t=tasks.find(x=>x.id===editId); if(t){ t.name=name; t.desc=desc; t.mins=mins; t.secs=secs; t.priority=selPrio; } if(activeId===editId){totalSecs=mins*60+secs; showAT(t);}}
   else tasks.push({id:uid(),name,desc,mins,secs,priority:selPrio,createdAt:Date.now()});
   save(); render(); window.closeTaskM();
 }
+
 document.querySelectorAll('.popt').forEach(b=>{b.onclick=()=>{selPrio=b.dataset.p;updPrioUI();};});
 function updPrioUI(){document.querySelectorAll('.popt').forEach(b=>{b.className='popt';if(b.dataset.p===selPrio)b.classList.add({'critical':'sc','high':'sh','medium':'sm','low':'sl'}[selPrio]);});}
 
@@ -1117,15 +1157,42 @@ window.openCustomTime = function(){document.getElementById('emins').value='';doc
 window.closeCust = function(){document.getElementById('custM').classList.remove('open');}
 window.addCustTime = function(){ const m=parseInt(document.getElementById('emins').value)||0, s=parseInt(document.getElementById('esecs').value)||0; if(!m&&!s)return; window.addTime(m*60+s); window.closeCust(); }
 
-// ===== TEMPLATES =====
+// ===== TEMPLATES & TEMPLATE EDITOR =====
+let activeTmplId = null;
+let activeTmplTasks = [];
+
 window.openTmplLib = function(){closeDrawer();renderTmplList();document.getElementById('tmplM').classList.add('open');}
 window.closeTmplLib = function(){document.getElementById('tmplM').classList.remove('open');}
+
+window.openNewTmpl = function() {
+    activeTmplId = null;
+    document.getElementById('tmplEditN').value = '';
+    activeTmplTasks = [];
+    renderTmplEditList();
+    document.getElementById('tmplM').classList.remove('open');
+    document.getElementById('tmplEditM').classList.add('open');
+}
+
 function renderTmplList(){
-  const el=document.getElementById('tmplList'); if(!templates.length){el.innerHTML='<p>No templates.</p>';return;} el.innerHTML='';
+  const el=document.getElementById('tmplList'); if(!templates.length){el.innerHTML='<p style="color:var(--text3);">No templates saved.</p>';return;} el.innerHTML='';
   templates.forEach(tm=>{
-    const d=document.createElement('div');d.className='titem'; d.innerHTML=`<div style="flex:1;"><div>${esc(tm.name)}</div></div><button class="tidel" onclick="delTmpl('${tm.id}');event.stopPropagation();">X</button>`; d.onclick=()=>loadTmpl(tm.id); el.appendChild(d);
+    const d=document.createElement('div'); d.className='titem'; 
+    d.innerHTML=`
+      <div style="flex:1;" onclick="loadTmpl('${tm.id}')">
+        <div class="tiname">${esc(tm.name)}</div>
+        <div class="ticnt">${tm.tasks.length} tasks</div>
+      </div>
+      <div style="display:flex;gap:4px;">
+        <button class="tidel" onclick="openTmplEdit('${tm.id}');event.stopPropagation();" title="Edit Template">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+        </button>
+        <button class="tidel" onclick="delTmpl('${tm.id}');event.stopPropagation();" title="Delete Template">X</button>
+      </div>
+    `; 
+    el.appendChild(d);
   });
 }
+
 window.openSaveTmpl = function(){ 
   if(!tasks.length){ toast("Queue is empty."); return; } 
   document.getElementById('tmplN').value=''; 
@@ -1144,6 +1211,113 @@ window.delTmpl = function(id){
     templates = templates.filter(t => t.id !== id); 
     save(); renderTmplList(); render(); toast('Template moved to Bin.');
   });
+}
+
+// Template Editor Modal Logic
+window.openTmplEdit = function(id) {
+    const tm = templates.find(t => t.id === id);
+    if (!tm) return;
+    activeTmplId = id;
+    document.getElementById('tmplEditN').value = tm.name;
+    activeTmplTasks = JSON.parse(JSON.stringify(tm.tasks)); 
+    renderTmplEditList();
+    document.getElementById('tmplM').classList.remove('open'); 
+    document.getElementById('tmplEditM').classList.add('open'); 
+}
+
+window.closeTmplEdit = function() {
+    document.getElementById('tmplEditM').classList.remove('open');
+    activeTmplId = null;
+    document.getElementById('tmplM').classList.add('open'); 
+}
+
+window.saveTmplEdit = function() {
+    const n = document.getElementById('tmplEditN').value.trim();
+    if (!n) { toast("Template name is required."); return; }
+    
+    if (activeTmplId) {
+        const tm = templates.find(t => t.id === activeTmplId);
+        if (tm) {
+            tm.name = n;
+            tm.tasks = activeTmplTasks;
+        }
+    } else {
+        templates.push({ id: uid(), name: n, tasks: activeTmplTasks, createdAt: Date.now() });
+    }
+    
+    save(); 
+    renderTmplList(); 
+    render();
+    closeTmplEdit();
+    toast("Template saved.");
+}
+
+window.openTmplTaskAdd = function() {
+    taskContext = 'template';
+    editId = null;
+    selPrio = 'medium';
+    document.getElementById('tname').value = '';
+    document.getElementById('tdesc').value = '';
+    document.getElementById('tmins').value = '';
+    document.getElementById('tsecs').value = '';
+    document.getElementById('taskMT').textContent = 'New Template Task';
+    updPrioUI();
+    document.getElementById('taskM').style.zIndex = '10010'; 
+    document.getElementById('taskM').classList.add('open');
+    setTimeout(()=>document.getElementById('tname').focus(),350);
+}
+
+window.openTmplTaskEdit = function(idx) {
+    taskContext = 'template';
+    editId = idx;
+    const t = activeTmplTasks[idx];
+    selPrio = t.priority;
+    document.getElementById('tname').value = t.name;
+    document.getElementById('tdesc').value = t.desc || '';
+    document.getElementById('tmins').value = t.mins;
+    document.getElementById('tsecs').value = t.secs;
+    document.getElementById('taskMT').textContent = 'Edit Template Task';
+    updPrioUI();
+    document.getElementById('taskM').style.zIndex = '10010'; 
+    document.getElementById('taskM').classList.add('open');
+}
+
+window.deleteTmplTask = function(idx) {
+    activeTmplTasks.splice(idx, 1);
+    renderTmplEditList();
+}
+
+window.moveTmplTask = function(idx, dir) {
+    if(idx + dir < 0 || idx + dir >= activeTmplTasks.length) return;
+    const temp = activeTmplTasks[idx];
+    activeTmplTasks[idx] = activeTmplTasks[idx + dir];
+    activeTmplTasks[idx + dir] = temp;
+    renderTmplEditList();
+}
+
+function renderTmplEditList() {
+    const el = document.getElementById('tmplEditList');
+    if (!activeTmplTasks.length) { el.innerHTML = '<p style="color:var(--text3);font-size:13px;padding: 12px 0;">No tasks in template.</p>'; return; }
+    el.innerHTML = '';
+    activeTmplTasks.forEach((t, idx) => {
+        const d = document.createElement('div');
+        d.className = 'titem';
+        d.style.padding = '10px 14px';
+        d.style.cursor = 'default';
+        d.innerHTML = `
+            <div style="flex:1;">
+                <div class="tiname">${esc(t.name)}</div>
+                <div class="ticnt">${fmt(t.mins*60+t.secs)} • ${t.priority}</div>
+            </div>
+            <div style="display:flex;gap:2px;">
+                <button class="tidel" onclick="moveTmplTask(${idx}, -1)" ${idx===0?'disabled':''} style="${idx===0?'opacity:0.3;cursor:not-allowed':''}" title="Move Up"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg></button>
+                <button class="tidel" onclick="moveTmplTask(${idx}, 1)" ${idx===activeTmplTasks.length-1?'disabled':''} style="${idx===activeTmplTasks.length-1?'opacity:0.3;cursor:not-allowed':''}" title="Move Down"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
+                <button class="tidel" onclick="openTmplTaskEdit(${idx})" title="Edit Task"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
+                <button class="tidel" onclick="deleteTmplTask(${idx})" title="Delete Task">X</button>
+            </div>
+        `;
+        el.appendChild(d);
+    });
 }
 
 // ===== DRAG REORDER (MOBILE) =====
